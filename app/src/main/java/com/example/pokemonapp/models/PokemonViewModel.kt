@@ -1,26 +1,42 @@
 package com.example.pokemonapp.models
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pokemonapp.retrofit.RetrofitInstance
+import com.example.pokemonapp.retrofit.Api
+import com.example.pokemonapp.retrofit.PokemonRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PokemonViewModel : ViewModel() {
-    private val _r = MutableStateFlow<List<Pokemon>>(emptyList())
-    val r: StateFlow<List<Pokemon>> = _r
+class PokemonViewModel(
+    private val repository: Api = PokemonRepository()
 
-    init {
-        fetchPokemon()
+) : ViewModel() {
+    private val _pokemon = MutableStateFlow<Pokemon?>(null)
+    val pokemon: StateFlow<Pokemon?> get() = _pokemon.asStateFlow()
+    init{
+        fetchPokemon("bulbasaur") //Why not initialize to pokemon 1?
     }
-    private fun fetchPokemon(){
+    fun fetchPokemon(name: String) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.api.getPokemon()
-                _r.value = response.results
-            } catch(e: Exception){
-
+                val result = repository.getPokemon(name)
+                val error = result.errorBody()
+                val data = result.body()
+                if (error != null || !result.isSuccessful) {
+                    Log.d("Got an error", "Got an error")
+                    return@launch
+                }
+                if (data != null) {
+                    Log.d("Got data", "Got data")
+                    _pokemon.value = data
+                } else {
+                    Log.d("Got nothing", "Got data")
+                }
+            } catch (e: Exception) {
+                Log.e("Fetch Pokemon Error", "Error fetching Pokemon", e)
             }
         }
     }

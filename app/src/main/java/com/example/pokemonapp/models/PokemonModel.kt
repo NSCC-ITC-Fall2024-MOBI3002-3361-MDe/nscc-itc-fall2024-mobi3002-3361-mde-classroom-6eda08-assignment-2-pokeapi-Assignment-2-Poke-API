@@ -1,15 +1,21 @@
 package com.example.pokemonapp.models
 
-data class Pokemon(
-//    val front_default: String,
-    val name: String,
-    val weight: Int,
-    val height: Int,
-//    val types: List<String>
-)
+import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
-data class PokemonResponse(
-    val results: List<Pokemon>
+data class Pokemon(
+    @SerializedName("name")val name: String,
+    @SerializedName("weight")val weight: Int,
+    @SerializedName("height")val height: Int,
+    @SerializedName("types")val types: List<Type>,
+    @SerializedName("sprite")val sprite: Sprite
+)
+data class Type(
+    @SerializedName("name")val name: String
+)
+data class Sprite(
+    @SerializedName("front_default") val imageURL: String
 )
 
 //TODO
